@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout async="false" continueOnError="false" enabled="true" name="SC-Get-Access-Token">
+  <DisplayName>SC-Get-Access-Token</DisplayName>
+  <Properties/>
+  <Request clearPayload="true" variable="tokenRequest">
+    <Set>
+      <Verb>POST</Verb>
+      <Headers>
+        <Header name="Accept">application/json</Header>
+      </Headers>
+      <FormParams>
+        <FormParam name="client_id">{clientid}</FormParam>
+        <FormParam name="client_secret">{clientsecret}</FormParam>
+        <FormParam name="response_type">code</FormParam>
+        <FormParam name="code">{request.formparam.code}</FormParam>
+        <FormParam name="grant_type">{request.formparam.grant_type}</FormParam>
+        <FormParam name="redirect_uri">{request.formparam.redirect_uri}</FormParam>
+      </FormParams>
+    </Set>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  </Request>
+  <Response>tokenCalloutResponse</Response>
+  <HTTPTargetConnection>
+    <Properties/>
+    <!-- <URL>https://oauth2.googleapis.com/token</URL> -->
+    <URL>https://integrator-4351893.okta.com/oauth2/default/v1/token</URL>
+  </HTTPTargetConnection>
+</ServiceCallout>

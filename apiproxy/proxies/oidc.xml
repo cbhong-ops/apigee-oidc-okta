@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ProxyEndpoint name="oidc">
+  <PreFlow name="PreFlow">
+    <Request/>
+    <Response/>
+  </PreFlow>
+  <Flows>
+    <Flow name="Authorize">
+      <Description>Authorize Endpoint Call</Description>
+      <Request>
+        <Step>
+          <Name>Verify-API-Key</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>KVM-okta-app</Name>
+        </Step>
+        <Step>
+          <Name>AM-gid-app</Name>
+        </Step>
+        <Step>
+          <Name>AM-OKTA-Redirect</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/auth") and (request.verb = "GET")</Condition>
+    </Flow>
+    <Flow name="Token">
+      <Description>Token endpoint for auth code</Description>
+      <Request>
+        <Step>
+          <Name>KVM-okta-app</Name>
+        </Step>
+        <Step>
+          <Name>SC-Get-Access-Token</Name>
+        </Step>
+        <Step>
+          <Name>EV-Get-OKTA-Token</Name>
+        </Step>
+        <Step>
+          <Name>AM-Validate-Client-Credentials</Name>
+        </Step>
+        <Step>
+          <Name>JWT-Parse</Name>
+        </Step>
+        <Step>
+          <Name>EV-Get-ID-Token</Name>
+        </Step>
+        <Step>
+          <Name>OAuth-v20</Name>
+        </Step>
+      </Request>
+      <Response/>
+      <Condition>(proxy.pathsuffix MatchesPath "/token") and (request.verb = "POST")</Condition>
+    </Flow>
+    <Flow name="Protected">
+      <Description>Only allows calls with a valid OAuth Token</Description>
+      <Request>
+        <Step>
+          <Name>VerifyAccessToken</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/protected") and (request.verb = "GET")</Condition>
+    </Flow>
+    <Flow name="unknown request">
+      <Description/>
+      <Request>
+        <Step>
+          <Name>RF-UnknownRequest</Name>
+        </Step>
+      </Request>
+      <Response/>
+    </Flow>
+  </Flows>
+  <PostFlow name="PostFlow">
+    <Request/>
+    <Response/>
+  </PostFlow>
+  <HTTPProxyConnection>
+    <BasePath>/v1/oidc/oauth20</BasePath>
+    <VirtualHost>default</VirtualHost>
+  </HTTPProxyConnection>
+  <RouteRule name="NoRouteRule"/>
+</ProxyEndpoint>
