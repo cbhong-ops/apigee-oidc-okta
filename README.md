@@ -89,6 +89,7 @@ On the Okta App configuration page, copy and save the following credentials:
 - **Client ID**
 - **Client Secret**
 - **Okta Domain** (e.g., `integrator-XXXXXX.okta.com`)
+![okta credentials](./images/okta-oidc-05.png)
 
 ### 3. Create a Test User in Okta
 1. Navigate to **Directory** > **People**.
@@ -117,6 +118,7 @@ Before deploying the proxy, configure your Okta domain:
    ```properties
    domain_name=your-okta-domain
    ```
+![okta domain](./images/okta-oidc-06.png)
 
 ### 2. Deploy the Proxy & Configure Entities
 Configure your Apigee environment variables and run the deployment script to deploy the API proxy, and automatically set up the API product and developer app.
@@ -188,7 +190,7 @@ To verify the integration, use the **Google Developers OAuth 2.0 Playground**.
    - **Token endpoint**: `https://{your-apigee-hostname}/v1/oidc/oauth20/token`
    - **OAuth Client ID**: *{Your Apigee App's Consumer Key (Client ID)}*
    - **OAuth Client Secret**: *{Your Apigee App's Consumer Secret (Client Secret)}*
-5. Close the configuration panel.
+![oauth setting](./images/okta-oidc-07.png)
 
 ### 2. Run the Flow
 
@@ -198,10 +200,12 @@ To verify the integration, use the **Google Developers OAuth 2.0 Playground**.
 3. You will be redirected to the Okta login screen via Apigee.
 4. Log in using the test user credentials created in Okta.
 5. After successful login, you will be redirected back to the OAuth Playground with an **Authorization code**.
+![oauth setting](./images/okta-oidc-08.png)
 
 #### Step 2: Exchange Code for Access Token
 1. Click **Exchange authorization code for tokens**.
 2. Playground will call Apigee's `/token` endpoint and return an opaque Apigee access token.
+![oauth setting](./images/okta-oidc-09.png)
 
 #### Step 3: Access Protected API
 1. In Step 3 of the Playground, set the **Request URI** to:
@@ -210,6 +214,7 @@ To verify the integration, use the **Google Developers OAuth 2.0 Playground**.
    ```
 2. Click **Send request**.
 3. Confirm that the request returns `200 OK` along with the expected payload, validating that Apigee successfully verified the token locally.
+![oauth setting](./images/okta-oidc-10.png)
 
 ---
 
