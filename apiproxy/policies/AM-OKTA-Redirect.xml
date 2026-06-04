@@ -13,7 +13,7 @@
       <!-- 
             <Header name="Location">https://accounts.google.com/o/oauth2/auth?client_id={request.queryparam.apikey}&amp;response_type=code&amp;response_mode=query&amp;scope=email+openid+profile&amp;redirect_uri=https://localhost&amp;state={messageid}</Header>
             -->
-      <Header name="Location">https://integrator-4351893.okta.com/oauth2/default/v1/authorize?{oktaquerystring}</Header>
+      <Header name="Location">https://{propertyset.okta.domain_name}/oauth2/default/v1/authorize?{oktaquerystring}</Header>
     </Headers>
   </Set>
   <!-- Set this flow variable to indicate the response has been set -->

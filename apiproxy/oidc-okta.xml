@@ -1,8 +1,8 @@
-<APIProxy revision="10" name="oidc-okta">
+<APIProxy revision="12" name="oidc-okta">
     <DisplayName>OIDC</DisplayName>
     <Description></Description>
-    <CreatedAt>1780537698075</CreatedAt>
-    <LastModifiedAt>1780537970917</LastModifiedAt>
+    <CreatedAt>1780555148478</CreatedAt>
+    <LastModifiedAt>1780555148478</LastModifiedAt>
     <BasePaths>/v1/oidc/kvm</BasePaths>
     <BasePaths>/v1/oidc/oauth20</BasePaths>
     <Policies>
@@ -35,7 +35,6 @@
         <ProxyEndpoint>oidc</ProxyEndpoint>
     </ProxyEndpoints>
     <Resources>
-        <Resource>jsc://msg-response.js</Resource>
-        <Resource>jsc://set-target.js</Resource>
+        <Resource>properties://okta.properties</Resource>
     </Resources>
 </APIProxy>

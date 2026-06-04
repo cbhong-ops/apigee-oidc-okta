@@ -9,6 +9,8 @@ In this architecture, Apigee acts as an OAuth 2.0 Authorization Server and API G
 ## Architecture
 
 The following diagram illustrates the interaction between the Client, Apigee, and Okta during the OAuth 2.0 Authorization Code Flow and subsequent API calls.
+![oidc architecture](./images/okta-oidc-01.png)
+
 
 ### Sequence Flow
 
@@ -24,10 +26,10 @@ sequenceDiagram
     Client->>Apigee: Redirects to /authorize<br/>(Client ID, Scope, Redirect URI, State)
     Apigee->>Client: Redirects to Okta /authorize<br/>(Okta Client ID, Scope, Redirect URI)
     User->>Okta: Authenticate & Consent
-    Okta->>Client: Redirect to /callback with Okta Auth Code
+    Okta->>Client: Redirect to Client with Okta Auth Code
 
     Note over User, Okta: Phase 2: Token Exchange Flow
-    Client->>Apigee: Request to Okta to exchange Auth Code for Tokens
+    Client->>Apigee: Request to Apigee for Tokens with Auth Code
     Apigee->>Okta: Exchange Auth Code for ID/Access Tokens 
     Okta-->>Apigee: Return Okta ID/Access Tokens
     Apigee->>Apigee: Save Okta Access Token as Apigee Token
@@ -57,22 +59,36 @@ Follow these steps to configure your Okta Developer Account to work with Apigee.
 2. In the left-hand navigation menu, go to **Applications** > **Applications**.
 3. Click **Create App Integration**.
 4. Select **OIDC - OpenID Connect** as the Sign-in method, and **Web Application** as the Application type. Click **Next**.
+![okta create app integration](./images/okta-oidc-02.png)
 5. Configure the application:
-   - **App integration name**: `Apigee-OIDC-App`
+   - **App integration name**: `Apigee App`
    - **Grant type**: Authorization Code
    - **Sign-in redirect URIs**: 
      ```text
-     https://{your-apigee-hostname}/v1/oauth20/callback
+     https://developers.google.com/oauthplayground
      ```
-     *(Example: `https://34.149.2.239.nip.io/v1/oauth20/callback`)*
+![okta redirect uri](./images/okta-oidc-03.png)   
    - **Controlled access**: Select **Allow everyone in your organization to access** (or configure groups accordingly).
+![okta controlled access](./images/okta-oidc-04.png)
 6. Click **Save**.
+
+> [!IMPORTANT]
+> **Configure Okta Access Policy (Sign-on Policy)**
+> If the users testing the integration encounter the error:
+> `idx error code: no matching policy - You are not allowed to access this app. To request access, contact an admin.`
+> It means they do not match any rules in the application's Access Policy. 
+> To resolve or prevent this, configure the Access Policy under the **Sign On** tab of the application in the Okta Admin Console:
+> 1. Go to **Applications** > **Applications** and select your application.
+> 2. Click the **Sign On** tab.
+> 3. Under **User Access**, verify the assigned **Access Policy** and its rules.
+> 4. Ensure there is a rule that matches your test user or group and permits access. For detailed steps, see the [Okta Support Article](https://support.okta.com/help/s/article/error-idx-error-code-no-matching-policy-you-are-not-allowed-to-access-this-app-to-request-access-contact-an-admin?language=en_US).
+
 
 ### 2. Capture Client Credentials & Okta Domain
 On the Okta App configuration page, copy and save the following credentials:
 - **Client ID**
 - **Client Secret**
-- **Okta Domain** (e.g., `dev-XXXXXX.okta.com`)
+- **Okta Domain** (e.g., `integrator-XXXXXX.okta.com`)
 
 ### 3. Create a Test User in Okta
 1. Navigate to **Directory** > **People**.
@@ -81,31 +97,79 @@ On the Okta App configuration page, copy and save the following credentials:
 4. Set the password option to **Set by Admin** and configure a password.
 5. Click **Save**.
 
+### 4. Assign the Application to the Test User
+If you did not select "Allow everyone in your organization to access" during the application setup (or if your Okta organization requires manual assignment):
+1. Navigate to **Applications** > **Applications**.
+2. Click on the application you created (`Apigee App`).
+3. Select the **Assignments** tab.
+4. Click the **Assign** dropdown and choose **Assign to People**.
+5. Find your test user, click **Assign**, and click **Save and Go Back**.
+6. Click **Done**.
+
 ---
 
 ## oidc proxy Setup
 
-To set up the OIDC API proxy in Apigee, configure a proxy bundle with the following endpoints and policies.
+### 1. Configure Okta Domain
+Before deploying the proxy, configure your Okta domain:
+1. Open the [okta.properties](./apiproxy/resources/properties/okta.properties) file.
+2. Replace the `domain_name` value with your Okta Domain (e.g., `integrator-XXXXXX.okta.com`):
+   ```properties
+   domain_name=your-okta-domain
+   ```
 
-### Endpoints Configuration
+### 2. Deploy the Proxy & Configure Entities
+Configure your Apigee environment variables and run the deployment script to deploy the API proxy, and automatically set up the API product and developer app.
 
-* **`GET /authorize`**:
-  - Redirects the user's browser to Okta's authorize endpoint.
-  - URL format: `https://{okta-domain}/oauth2/v1/authorize?client_id={okta-client-id}&response_type=code&scope=openid%20profile%20email&redirect_uri=https://{apigee-hostname}/v1/oauth20/callback&state={state}`
+1. Open [env.sh](./env.sh) and configure your Apigee Organization and Environment:
+   ```bash
+   export APIGEE_ORG="your-apigee-org"
+   export APIGEE_ENV="your-apigee-env"
+   ```
+   Then, run the following command to apply the changes:
+   ```bash
+   source ./env.sh
+   ```
 
-* **`GET /callback`**:
-  - Receives the authorization code from Okta.
-  - Performs a **Service Callout** (or custom script) to Okta's token endpoint (`https://{okta-domain}/oauth2/v1/token`) using Apigee's Okta client credentials to exchange the authorization code for Okta ID and Access tokens.
-  - Stores the retrieved Okta tokens.
-  - Calls Apigee's **OAuthV2 policy** with the `GenerateAuthorizationCode` operation to generate an Apigee-specific authorization code, embedding the Okta tokens/claims as custom attributes.
-  - Redirects the client back to their original `redirect_uri` with the generated authorization code.
+2. Run the deployment script:
+   ```bash
+   ./deploy-oidc-okta.sh
+   ```
 
-* **`POST /token`**:
-  - Standard OAuth 2.0 token endpoint.
-  - Uses Apigee's **OAuthV2 policy** with the `GenerateAccessToken` operation to exchange the Apigee authorization code for an Apigee Access Token.
+3. Note down the **Client ID** (Consumer Key) and **Client Secret** (Consumer Secret) returned at the end of the script:
+   ```text
+   ============================================================
+   Deployment and Setup Completed!
+   API Proxy: oidc-okta
+   Developer App: oidc-okta-app
+   Client ID (Consumer Key): XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   Client Secret (Consumer Secret): XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   ============================================================
+   ```
 
-* **`GET /protected`** (or any proxy endpoint):
-  - Uses the **OAuthV2 policy** with the `VerifyAccessToken` operation to validate incoming requests.
+4. Configure the Okta Client ID and Client Secret in the Apigee Key Value Map (KVM) using the `/kvm` endpoint. The `apikey` header value must be the **Apigee Client ID** (Consumer Key) obtained in Step 3.
+
+   **Update Okta Client ID in KVM:**
+   ```bash
+   curl --location 'https://{YOUR_APIGEE_HOSTNAME}/v1/oidc/kvm' \
+   --header 'apikey: {YOUR_APIGEE_CLIENT_ID}' \
+   --header 'Content-Type: application/json' \
+   --data '{
+     "kvm-key":"okta.app.id",
+     "kvm-val":"YOUR_OKTA_CLIENT_ID"
+   }'
+   ```
+
+   **Update Okta Client Secret in KVM:**
+   ```bash
+   curl --location 'https://{YOUR_APIGEE_HOSTNAME}/v1/oidc/kvm' \
+   --header 'apikey: {YOUR_APIGEE_CLIENT_ID}' \
+   --header 'Content-Type: application/json' \
+   --data '{
+     "kvm-key":"okta.app.secret",
+     "kvm-val":"YOUR_OKTA_CLIENT_SECRET"
+   }'
+   ```
 
 ---
 
@@ -119,10 +183,11 @@ To verify the integration, use the **Google Developers OAuth 2.0 Playground**.
 3. Check **Use your own OAuth credentials**.
 4. Configure the following fields:
    - **OAuth flow**: Server-side (Authorization Code)
-   - **Authorization endpoint**: `https://{your-apigee-hostname}/v1/oauth20/authorize`
-   - **Token endpoint**: `https://{your-apigee-hostname}/v1/oauth20/token`
-   - **OAuth Client ID**: *{Your Apigee App's Consumer Key}*
-   - **OAuth Client Secret**: *{Your Apigee App's Consumer Secret}*
+   - **OAuth endpoints**: Custom
+   - **Authorization endpoint**: `https://{your-apigee-hostname}/v1/oidc/oauth20/auth?state=YOUR_STATE_STRING`
+   - **Token endpoint**: `https://{your-apigee-hostname}/v1/oidc/oauth20/token`
+   - **OAuth Client ID**: *{Your Apigee App's Consumer Key (Client ID)}*
+   - **OAuth Client Secret**: *{Your Apigee App's Consumer Secret (Client Secret)}*
 5. Close the configuration panel.
 
 ### 2. Run the Flow
@@ -141,7 +206,18 @@ To verify the integration, use the **Google Developers OAuth 2.0 Playground**.
 #### Step 3: Access Protected API
 1. In Step 3 of the Playground, set the **Request URI** to:
    ```text
-   https://{your-apigee-hostname}/v1/oauth20/protected
+   https://{your-apigee-hostname}/v1/oidc/oauth20/protected
    ```
 2. Click **Send request**.
 3. Confirm that the request returns `200 OK` along with the expected payload, validating that Apigee successfully verified the token locally.
+
+---
+
+## Clean Up / Undeploy
+
+Once testing is complete, you can remove all created Apigee resources (Developer App, Developer, API Product, and API Proxy) by running the cleanup script:
+
+```bash
+./undeploy-all.sh
+```
+
