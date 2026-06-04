@@ -22,17 +22,15 @@ sequenceDiagram
 
     Note over User, Okta: Phase 1: Authorization Code Flow
     Client->>Apigee: Redirects to /authorize<br/>(Client ID, Scope, Redirect URI, State)
-    Apigee->>Okta: Redirects to Okta /authorize<br/>(Okta Client ID, Scope, Redirect URI)
+    Apigee->>Client: Redirects to Okta /authorize<br/>(Okta Client ID, Scope, Redirect URI)
     User->>Okta: Authenticate & Consent
-    Okta->>Apigee: Redirect to /callback with Okta Auth Code
-    Apigee->>Okta: Exchange Auth Code for ID/Access Tokens (Client Secret Basic)
-    Okta-->>Apigee: Return Okta ID/Access Tokens
-    Apigee->>Apigee: Generate Apigee Auth Code &<br/>Associate Okta Token attributes
-    Apigee->>Client: Redirect to Client URI with Apigee Auth Code
+    Okta->>Client: Redirect to /callback with Okta Auth Code
 
     Note over User, Okta: Phase 2: Token Exchange Flow
-    Client->>Apigee: POST /token (Auth Code, Client Credentials)
-    Apigee->>Apigee: Exchange Apigee Auth Code for Access Token
+    Client->>Apigee: Request to Okta to exchange Auth Code for Tokens
+    Apigee->>Okta: Exchange Auth Code for ID/Access Tokens 
+    Okta-->>Apigee: Return Okta ID/Access Tokens
+    Apigee->>Apigee: Save Okta Access Token as Apigee Token
     Apigee-->>Client: Return Apigee Access Token (Opaque)
 
     Note over User, Okta: Phase 3: API Verification Flow
@@ -60,7 +58,7 @@ Follow these steps to configure your Okta Developer Account to work with Apigee.
 3. Click **Create App Integration**.
 4. Select **OIDC - OpenID Connect** as the Sign-in method, and **Web Application** as the Application type. Click **Next**.
 5. Configure the application:
-   - **App integration name**: `Apigee-OIDC-Facade`
+   - **App integration name**: `Apigee-OIDC-App`
    - **Grant type**: Authorization Code
    - **Sign-in redirect URIs**: 
      ```text
