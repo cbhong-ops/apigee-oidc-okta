@@ -113,7 +113,7 @@ If you did not select "Allow everyone in your organization to access" during the
 
 ### 1. Configure Okta Domain
 Before deploying the proxy, configure your Okta domain:
-1. Open the [okta.properties](./apiproxy/resources/properties/okta.properties) file.
+1. Open the okta.properties file whose location is ./apiproxy/resources/properties/okta.properties.
 2. Replace the `domain_name` value with your Okta Domain (e.g., `integrator-XXXXXX.okta.com`):
    ```properties
    domain_name=your-okta-domain
