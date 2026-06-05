@@ -191,10 +191,10 @@ To verify the integration, use **oauth.tools**.
      - Add the scopes: `openid profile email`.
 ![oauth tools workspace](./images/okta-oidc-07.png)
 
-### 2. Update Okta Application Redirect URI
+### 2. Confirm Okta Application Redirect URI
 1. Go back to your **Okta Admin Console** and select your application (`Apigee App`).
 2. In the **General Settings**, click **Edit**.
-3. Under **Sign-in redirect URIs**, enter:
+3. Under **Sign-in redirect URIs**, confirm:
    ```text
    https://oauth.tools/callback/code
    ```
