@@ -112,13 +112,17 @@ If you did not select "Allow everyone in your organization to access" during the
 ## oidc proxy Setup
 
 ### 1. Configure Okta Domain
-Before deploying the proxy, configure your Okta domain:
-1. Open the okta.properties file whose location is ./apiproxy/resources/properties/okta.properties.
-2. Replace the `domain_name` value with your Okta Domain (e.g., `integrator-XXXXXX.okta.com`):
+Before deploying the proxy, you must check the Discovery document:
+1. Open `https://YOUR_OKTA_DOMAIN/oauth2/default/.well-known/openid-configuration` in your browser to check the configuration details.
+![okta discovery document](./images/okta-oidc-061.png)
+2. Open the okta.properties file located at `./apiproxy/resources/properties/okta.properties`.
+3. Replace `okta_domain`, `okta_authorize_uri`, and `okta_token_uri` with the values verified from the Discovery document:
    ```properties
-   domain_name=your-okta-domain
+   okta_domain=integrator-XXXXXX.okta.com
+   okta_authorize_uri=/oauth2/default/v1/authorize
+   okta_token_uri=/oauth2/default/v1/token
    ```
-![okta domain](./images/okta-oidc-06.png)
+![okta domain](./images/okta-oidc-062.png)
 
 ### 2. Deploy the Proxy & Configure Entities
 Configure your Apigee environment variables and run the deployment script to deploy the API proxy, and automatically set up the API product and developer app.

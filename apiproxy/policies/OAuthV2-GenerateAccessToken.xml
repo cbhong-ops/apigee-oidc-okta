@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<OAuthV2 async="false" continueOnError="false" enabled="true" name="OAuth-v20">
-  <DisplayName>OAuth v2.0</DisplayName>
+<OAuthV2 async="false" continueOnError="false" enabled="true" name="OAuthV2-GenerateAccessToken">
+  <DisplayName>OAuthV2-GenerateAccessToken</DisplayName>
   <Properties/>
   <Attributes>
     <Attribute name="user_email" ref="user_email" display="true"/>
@@ -11,7 +11,7 @@
   <ExternalAccessToken>access_token</ExternalAccessToken>
   <ExternalRefreshToken>refresh_token</ExternalRefreshToken>
   <Operation>GenerateAccessToken</Operation>
-  <ExpiresIn>3600000</ExpiresIn>
+  <ExpiresIn ref="expires_in_ms">600000</ExpiresIn>
   <!--ExpiresIn>-1</ExpiresIn-->
   <SupportedGrantTypes>
     <GrantType>client_credentials</GrantType>

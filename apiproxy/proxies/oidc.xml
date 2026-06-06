@@ -38,7 +38,7 @@
           <Name>EV-Get-OKTA-Token</Name>
         </Step>
         <Step>
-          <Name>AM-Validate-Client-Credentials</Name>
+          <Name>AM-UpdateTokenAttr</Name>
         </Step>
         <Step>
           <Name>JWT-Parse</Name>
@@ -47,7 +47,7 @@
           <Name>EV-Get-ID-Token</Name>
         </Step>
         <Step>
-          <Name>OAuth-v20</Name>
+          <Name>OAuthV2-GenerateAccessToken</Name>
         </Step>
       </Request>
       <Response/>

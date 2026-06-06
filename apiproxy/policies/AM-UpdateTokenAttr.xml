@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<AssignMessage async="false" continueOnError="false" enabled="true" name="AM-Validate-Client-Credentials">
-  <DisplayName>AM-Validate-Client-Credentials</DisplayName>
+<AssignMessage async="false" continueOnError="false" enabled="true" name="AM-UpdateTokenAttr">
+  <DisplayName>AM-UpdateTokenAttr</DisplayName>
   <Set>
     <FormParams>
       <FormParam name="client_id">{request.formparam.client_id}</FormParam>
       <FormParam name="grant_type">client_credentials</FormParam>
     </FormParams>
   </Set>
+  <AssignVariable>
+    <Name>expires_in_ms</Name>
+    <Template>{expires_in}000</Template>
+  </AssignVariable>
   <AssignVariable>
     <Name>oauth_external_authorization_status</Name>
     <Value>true</Value>

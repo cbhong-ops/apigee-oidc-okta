@@ -23,6 +23,6 @@
   <HTTPTargetConnection>
     <Properties/>
     <!-- <URL>https://oauth2.googleapis.com/token</URL> -->
-    <URL>https://{propertyset.okta.domain_name}/oauth2/default/v1/token</URL>
+    <URL>https://{propertyset.okta.okta_domain}{propertyset.okta.okta_token_uri}</URL>
   </HTTPTargetConnection>
 </ServiceCallout>
